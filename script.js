@@ -1,4 +1,4 @@
-=// Include Tesseract.js to handle OCR for image-based PDFs
+// Include Tesseract.js to handle OCR for image-based PDFs
 const Tesseract = window.Tesseract;
 
 // HTML Elements
@@ -190,4 +190,3 @@ stopButton.addEventListener('click', function () {
 if (synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = setVoice;
 }
-
