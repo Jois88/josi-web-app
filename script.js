@@ -1,76 +1,58 @@
-// Wait until the document is ready
-document.addEventListener('DOMContentLoaded', function() {
-    // File Input change event
-    document.getElementById('fileInput').addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const fileReader = new FileReader();
-            fileReader.onload = function() {
-                const typedarray = new Uint8Array(this.result);
-                pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
-                    pdf.getPage(1).then(function(page) {
-                        const scale = 1.5;
-                        const viewport = page.getViewport({ scale: scale });
+document.getElementById('fileInput').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (file.type !== 'application/pdf') {
+        alert('Please select a valid PDF file.');
+        return;
+    }
 
-                        const canvas = document.createElement('canvas');
-                        const context = canvas.getContext('2d');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
+    const fileReader = new FileReader();
+    fileReader.onload = function () {
+        const typedArray = new Uint8Array(this.result);
+        pdfjsLib.getDocument({ data: typedArray }).promise.then(pdf => {
+            // Get first page
+            pdf.getPage(1).then(page => {
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale: scale });
 
-                        const renderContext = {
-                            canvasContext: context,
-                            viewport: viewport
-                        };
-                        page.render(renderContext).promise.then(function() {
-                            document.getElementById('pdfContent').appendChild(canvas);
-                        });
+                // Prepare canvas using PDF page dimensions
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
 
-                        // Extract text content from PDF page
-                        page.getTextContent().then(function(textContent) {
-                            let text = "";
-                            textContent.items.forEach(function(item) {
-                                text += item.str + " ";
-                            });
-
-                            // Use Web Speech API to read text aloud
-                            const utterance = new SpeechSynthesisUtterance(text);
-                            const playButton = document.getElementById('playButton');
-                            const pauseButton = document.getElementById('pauseButton');
-                            const stopButton = document.getElementById('stopButton');
-
-                            let isPaused = false;
-
-                            // Play button event listener
-                            playButton.addEventListener('click', function() {
-                                if (isPaused) {
-                                    speechSynthesis.resume();
-                                } else {
-                                    speechSynthesis.speak(utterance);
-                                }
-                                isPaused = false;
-                            });
-
-                            // Pause button event listener
-                            pauseButton.addEventListener('click', function() {
-                                if (speechSynthesis.speaking) {
-                                    speechSynthesis.pause();
-                                    isPaused = true;
-                                }
-                            });
-
-                            // Stop button event listener
-                            stopButton.addEventListener('click', function() {
-                                speechSynthesis.cancel();
-                                isPaused = false;
-                            });
-
-                        });
-                    });
-                }).catch(function(error) {
-                    console.error('Error loading PDF:', error);
+                // Render PDF page into canvas context
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext).promise.then(() => {
+                    document.getElementById('pdfContent').appendChild(canvas);
                 });
-            };
-            fileReader.readAsArrayBuffer(file);
-        }
-    });
+            });
+        });
+    };
+    fileReader.readAsArrayBuffer(file);
+});
+
+// Voice synthesis functionality
+let synth = window.speechSynthesis;
+let utterance;
+document.getElementById('playButton').addEventListener('click', () => {
+    const text = document.getElementById('pdfContent').innerText;
+    if (text.trim() === '') {
+        alert('Please wait for the PDF to load.');
+        return;
+    }
+    utterance = new SpeechSynthesisUtterance(text);
+    synth.speak(utterance);
+});
+
+document.getElementById('pauseButton').addEventListener('click', () => {
+    if (synth.speaking && !synth.paused) {
+        synth.pause();
+    }
+});
+
+document.getElementById('stopButton').addEventListener('click', () => {
+    synth.cancel();
 });
