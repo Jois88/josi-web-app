@@ -5,17 +5,23 @@
 </head>
 <body>
   <h1>Hello, GitHub!</h1>
-  
+
   <!-- File input to upload a PDF -->
   <input type="file" id="fileInput" accept="application/pdf" />
-  
+
   <!-- Placeholder to display the extracted text -->
   <div id="pdfContent"></div>
 
-  <!-- Link to PDF.js (pdf.mjs) -->
-  <script src="pdf.mjs"></script> 
-  
+  <!-- Link to PDF.js (pdf.js) -->
+  <script src="pdf.js"></script>
+
   <!-- Link to the custom JavaScript script.js -->
   <script src="script.js"></script>
+
+  <!-- Set the workerSrc dynamically -->
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
+  </script>
 </body>
 </html>
+
