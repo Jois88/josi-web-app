@@ -1,1 +1,41 @@
+/* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    color: #007acc;
+}
+
+#controls {
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 15px;
+    margin: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007acc;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #005f99;
+}
+
+#pdfContent {
+    margin-top: 30px;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #ccc;
+    min-height: 300px;
+}
 
