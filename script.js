@@ -1,3 +1,6 @@
+// Include Tesseract.js to handle OCR for image-based PDFs
+const Tesseract = window.Tesseract;
+
 document.getElementById('fileInput').addEventListener('change', function (event) {
     const file = event.target.files[0];
     if (file && file.type === "application/pdf") {
@@ -8,51 +11,91 @@ document.getElementById('fileInput').addEventListener('change', function (event)
 
             // Load the PDF using pdf.js
             pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
-                pdf.getPage(1).then(function (page) {
-                    const scale = 1.5;
-                    const viewport = page.getViewport({ scale: scale });
+                // Start reading pages from page 1
+                let currentPage = 1;
 
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
+                function processPage(pageNumber) {
+                    if (pageNumber > pdf.numPages) {
+                        alert('Reached the end of the PDF. All pages processed.');
+                        return;
+                    }
 
-                    const renderContext = {
-                        canvasContext: context,
-                        viewport: viewport
-                    };
-                    page.render(renderContext).promise.then(function () {
-                        document.getElementById('pdfContent').innerHTML = ""; // Clear existing content
-                        document.getElementById('pdfContent').appendChild(canvas);
-                        alert('PDF has successfully loaded, now extracting text...');
+                    pdf.getPage(pageNumber).then(function (page) {
+                        const scale = 1.5;
+                        const viewport = page.getViewport({ scale: scale });
 
-                        // Extract text content
-                        page.getTextContent().then(function (textContent) {
-                            const textItems = textContent.items;
-                            let text = "";
-                            for (let i = 0; i < textItems.length; i++) {
-                                text += textItems[i].str + " ";
-                            }
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
 
-                            if (text.trim().length > 0) {
-                                window.extractedText = text;
-                                document.getElementById('playButton').disabled = false; // Enable play button
-                                alert('Text extraction completed, you can now play the audio.');
-                            } else {
-                                alert('No text found in the PDF page, please choose another file.');
-                            }
+                        const renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+
+                        // Render the page
+                        page.render(renderContext).promise.then(function () {
+                            document.getElementById('pdfContent').innerHTML = ""; // Clear existing content
+                            document.getElementById('pdfContent').appendChild(canvas);
+
+                            alert(`PDF page ${pageNumber} successfully loaded, now extracting text...`);
+
+                            // Extract text content
+                            page.getTextContent().then(function (textContent) {
+                                const textItems = textContent.items;
+                                let text = "";
+                                for (let i = 0; i < textItems.length; i++) {
+                                    text += textItems[i].str + " ";
+                                }
+
+                                if (text.trim().length > 0) {
+                                    window.extractedText = (window.extractedText || "") + text + "\n";
+                                    alert(`Text extraction completed for page ${pageNumber}. Moving to the next page...`);
+                                    processPage(pageNumber + 1);
+                                } else {
+                                    // If no text found, use OCR to extract text from the image
+                                    alert(`No text found on page ${pageNumber}, attempting OCR...`);
+                                    Tesseract.recognize(
+                                        canvas,
+                                        'eng',
+                                        {
+                                            logger: (m) => console.log(m) // Log progress (optional)
+                                        }
+                                    ).then(({ data: { text } }) => {
+                                        if (text.trim().length > 0) {
+                                            window.extractedText = (window.extractedText || "") + text + "\n";
+                                            alert(`OCR completed for page ${pageNumber}. Moving to the next page...`);
+                                            processPage(pageNumber + 1);
+                                        } else {
+                                            alert(`OCR failed to extract any text on page ${pageNumber}. Moving to the next page...`);
+                                            processPage(pageNumber + 1);
+                                        }
+                                    }).catch(function (error) {
+                                        console.error('Error with OCR:', error);
+                                        alert(`Failed to extract text using OCR on page ${pageNumber}. Moving to the next page...`);
+                                        processPage(pageNumber + 1);
+                                    });
+                                }
+                            }).catch(function (error) {
+                                console.error('Error extracting text:', error);
+                                alert(`Failed to extract text from page ${pageNumber}. Moving to the next page...`);
+                                processPage(pageNumber + 1);
+                            });
                         }).catch(function (error) {
-                            console.error('Error extracting text:', error);
-                            alert('Failed to extract text from the PDF. Please try again with another file.');
+                            console.error('Error rendering page:', error);
+                            alert(`Failed to render page ${pageNumber}. Moving to the next page...`);
+                            processPage(pageNumber + 1);
                         });
                     }).catch(function (error) {
-                        console.error('Error rendering page:', error);
-                        alert('Failed to render the PDF page.');
+                        console.error('Error getting page:', error);
+                        alert(`Failed to retrieve page ${pageNumber}. Moving to the next page...`);
+                        processPage(pageNumber + 1);
                     });
-                }).catch(function (error) {
-                    console.error('Error getting page:', error);
-                    alert('Failed to retrieve the page from the PDF.');
-                });
+                }
+
+                // Start processing the first page
+                processPage(currentPage);
             }).catch(function (error) {
                 console.error('Error loading PDF:', error);
                 alert('Failed to load the PDF. Please try another file.');
