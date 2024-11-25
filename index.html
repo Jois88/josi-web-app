@@ -1,27 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Web App - PDF Reader</title>
+    <title>My Web App - PDF Reader</title>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
 </head>
 <body>
-  <h1>Hello, GitHub!</h1>
+    <h1>Hello, GitHub!</h1>
 
-  <!-- File input to upload a PDF -->
-  <input type="file" id="fileInput" accept="application/pdf" />
+    <!-- File input to upload a PDF -->
+    <input type="file" id="fileInput" accept="application/pdf" />
 
-  <!-- Placeholder to display the extracted text or PDF page -->
-  <div id="pdfContent"></div>
+    <!-- Placeholder to display the extracted text -->
+    <div id="pdfContent"></div>
 
-  <!-- Link to PDF.js (pdf.js) -->
-  <script src="pdf.js"></script>
-
-  <!-- Link to the custom JavaScript script.js -->
-  <script src="script.js"></script>
-
-  <!-- Set the workerSrc dynamically -->
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
-  </script>
+    <!-- Link to the custom JavaScript script.js -->
+    <script src="script.js"></script>
 </body>
 </html>
+
 
