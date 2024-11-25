@@ -22,23 +22,40 @@ document.getElementById('fileInput').addEventListener('change', function (event)
                         viewport: viewport
                     };
                     page.render(renderContext).promise.then(function () {
+                        document.getElementById('pdfContent').innerHTML = ""; // Clear existing content
                         document.getElementById('pdfContent').appendChild(canvas);
-                        document.getElementById('playButton').disabled = false; // Enable play button
-                        alert('PDF has successfully loaded, you can now play the audio.');
-                    });
+                        alert('PDF has successfully loaded, now extracting text...');
 
-                    // Extract text content
-                    page.getTextContent().then(function (textContent) {
-                        const textItems = textContent.items;
-                        let text = "";
-                        for (let i = 0; i < textItems.length; i++) {
-                            text += textItems[i].str + " ";
-                        }
+                        // Extract text content
+                        page.getTextContent().then(function (textContent) {
+                            const textItems = textContent.items;
+                            let text = "";
+                            for (let i = 0; i < textItems.length; i++) {
+                                text += textItems[i].str + " ";
+                            }
 
-                        // Store the text for later use
-                        window.extractedText = text;
+                            if (text.trim().length > 0) {
+                                window.extractedText = text;
+                                document.getElementById('playButton').disabled = false; // Enable play button
+                                alert('Text extraction completed, you can now play the audio.');
+                            } else {
+                                alert('No text found in the PDF page, please choose another file.');
+                            }
+                        }).catch(function (error) {
+                            console.error('Error extracting text:', error);
+                            alert('Failed to extract text from the PDF. Please try again with another file.');
+                        });
+                    }).catch(function (error) {
+                        console.error('Error rendering page:', error);
+                        alert('Failed to render the PDF page.');
                     });
+                }).catch(function (error) {
+                    console.error('Error getting page:', error);
+                    alert('Failed to retrieve the page from the PDF.');
                 });
+            }).catch(function (error) {
+                console.error('Error loading PDF:', error);
+                alert('Failed to load the PDF. Please try another file.');
             });
         };
 
@@ -64,7 +81,7 @@ document.getElementById('playButton').addEventListener('click', function () {
             synth.resume();
         }
     } else {
-        alert('Please wait for the PDF to load.');
+        alert('Please wait for the PDF to load and the text to be extracted.');
     }
 });
 
