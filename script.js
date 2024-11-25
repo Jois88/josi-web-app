@@ -127,6 +127,7 @@ fileInput.addEventListener('change', function (event) {
 let synth = window.speechSynthesis;
 let utterance;
 let isPaused = false;
+let isPlaying = false;
 let availableVoices = [];
 
 // Load voices and ensure a voice is selected
@@ -140,40 +141,43 @@ function setVoice() {
 }
 
 playButton.addEventListener('click', function () {
-    if (window.extractedText) {
-        if (!utterance || isPaused) {
-            utterance = new SpeechSynthesisUtterance(window.extractedText);
-            setVoice(); // Set the voice before speaking
-            utterance.rate = 1; // Set rate of speech
-            utterance.pitch = 1; // Set pitch of speech
+    if (window.extractedText && !isPlaying) {
+        utterance = new SpeechSynthesisUtterance(window.extractedText);
+        setVoice(); // Set the voice before speaking
+        utterance.rate = 1; // Set rate of speech
+        utterance.pitch = 1; // Set pitch of speech
 
-            utterance.onstart = function () {
-                console.log('Speech has started.');
-            };
-
-            utterance.onend = function () {
-                console.log('Speech has ended.');
-            };
-
-            utterance.onerror = function (event) {
-                console.error('Speech synthesis error:', event.error);
-                progressIndicator.innerText = `An error occurred during playback: ${event.error}`;
-            };
-
-            synth.speak(utterance);
+        utterance.onstart = function () {
+            console.log('Speech has started.');
+            isPlaying = true;
             isPaused = false;
-        } else {
-            synth.resume();
-        }
-    } else {
-        progressIndicator.innerText = 'Please wait for the PDF text extraction to complete.';
+        };
+
+        utterance.onend = function () {
+            console.log('Speech has ended.');
+            isPlaying = false;
+            isPaused = false;
+        };
+
+        utterance.onerror = function (event) {
+            console.error('Speech synthesis error:', event.error);
+            progressIndicator.innerText = `An error occurred during playback: ${event.error}`;
+            isPlaying = false;
+        };
+
+        synth.speak(utterance);
+    } else if (isPaused) {
+        synth.resume();
+        isPaused = false;
+        isPlaying = true;
     }
 });
 
 pauseButton.addEventListener('click', function () {
-    if (synth.speaking) {
+    if (synth.speaking && !synth.paused) {
         synth.pause();
         isPaused = true;
+        isPlaying = false;
         console.log('Speech paused.');
     }
 });
@@ -182,6 +186,7 @@ stopButton.addEventListener('click', function () {
     if (synth.speaking) {
         synth.cancel();
         isPaused = false;
+        isPlaying = false;
         console.log('Speech stopped.');
     }
 });
