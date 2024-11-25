@@ -1,35 +1,32 @@
-document.getElementById('fileInput').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    if (file && file.type === 'application/pdf') {
+document.getElementById('fileInput').addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
         const fileReader = new FileReader();
-
         fileReader.onload = function() {
             const typedarray = new Uint8Array(this.result);
-
             pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
-                let textContent = "";
-                const pageCount = pdf.numPages;
+                pdf.getPage(1).then(function(page) {
+                    const scale = 1.5;
+                    const viewport = page.getViewport({ scale: scale });
 
-                // Loop through all the pages to extract the text
-                for (let pageNum = 1; pageNum <= pageCount; pageNum++) {
-                    pdf.getPage(pageNum).then(function(page) {
-                        page.getTextContent().then(function(text) {
-                            text.items.forEach(function(item) {
-                                textContent += item.str + " ";
-                            });
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
 
-                            // Display the content in the div
-                            document.getElementById('pdfContent').innerText = textContent;
-                        });
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    page.render(renderContext).promise.then(function() {
+                        document.getElementById('pdfContent').appendChild(canvas);
                     });
-                }
+                });
             }).catch(function(error) {
-                console.error("Error during PDF reading:", error);
+                console.error('Error loading PDF:', error);
             });
         };
-
         fileReader.readAsArrayBuffer(file);
-    } else {
-        alert("Please upload a valid PDF file.");
     }
 });
+
