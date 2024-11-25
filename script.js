@@ -4,7 +4,7 @@ document.getElementById('fileInput').addEventListener('change', function() {
         const fileReader = new FileReader();
         fileReader.onload = function() {
             const typedarray = new Uint8Array(this.result);
-            pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+            pdfjsLib.getDocument({ data: typedarray }).promise.then(function(pdf) {
                 pdf.getPage(1).then(function(page) {
                     const scale = 1.5;
                     const viewport = page.getViewport({ scale: scale });
