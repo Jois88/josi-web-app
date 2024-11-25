@@ -1,27 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Web App - PDF Reader</title>
+    <title>PDF Audio Reader</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
 </head>
 <body>
     <h1>PDF Audio Reader</h1>
 
     <!-- File input to upload a PDF -->
     <input type="file" id="fileInput" accept="application/pdf" />
-
-    <!-- Control buttons for audio playback -->
     <div id="controls">
+        <!-- Play, Pause, Stop buttons -->
         <button id="playButton">Play</button>
         <button id="pauseButton">Pause</button>
         <button id="stopButton">Stop</button>
     </div>
 
-    <!-- Placeholder to display the extracted text -->
+    <!-- Placeholder to display the extracted text or PDF rendering -->
     <div id="pdfContent"></div>
 
-    <!-- Link to the JavaScript -->
-    <script src="pdf.worker.js"></script>
+    <!-- Link to the custom JavaScript script.js -->
     <script src="script.js"></script>
 </body>
 </html>
