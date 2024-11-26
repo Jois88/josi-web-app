@@ -144,7 +144,7 @@ function setVoice() {
 
 playButton.addEventListener('click', function () {
     if (window.extractedText) {
-        if (!utterance || isPaused) {
+        if (!utterance || synth.paused) {
             utterance = new SpeechSynthesisUtterance(window.extractedText);
             setVoice(); // Set the voice before speaking
             utterance.rate = speedControl.value; // Set rate of speech
@@ -184,6 +184,7 @@ pauseButton.addEventListener('click', function () {
 stopButton.addEventListener('click', function () {
     if (synth.speaking) {
         synth.cancel();
+        utterance = null; // Reset the utterance object when stopped
         isPaused = false;
         console.log('Speech stopped.');
     }
@@ -191,8 +192,10 @@ stopButton.addEventListener('click', function () {
 
 // Speed Control Handler
 speedControl.addEventListener('input', function () {
-    if (utterance) {
+    if (utterance && synth.speaking) {
+        synth.cancel(); // Cancel current utterance
         utterance.rate = speedControl.value;
+        synth.speak(utterance); // Restart with new rate
     }
     console.log(`Speech rate set to: ${speedControl.value}x`);
 });
