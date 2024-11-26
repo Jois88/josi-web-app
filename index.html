@@ -1,26 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Audio Reader</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
 </head>
 <body>
     <h1>PDF Audio Reader</h1>
-
-    <!-- File input to upload a PDF -->
-    <input type="file" id="fileInput" accept="application/pdf" />
-    <div id="controls">
-        <!-- Play, Pause, Stop buttons -->
-        <button id="playButton">Play</button>
-        <button id="pauseButton">Pause</button>
-        <button id="stopButton">Stop</button>
-    </div>
-
-    <!-- Placeholder to display the extracted text or PDF rendering -->
+    <input type="file" id="fileInput" accept="application/pdf">
+    <br><br>
+    <button id="playButton" disabled>Play</button>
+    <button id="pauseButton" disabled>Pause</button>
+    <button id="stopButton" disabled>Stop</button>
+    <br><br>
+    <label for="speedControl">Speed:</label>
+    <input type="range" id="speedControl" min="0.5" max="2" value="1" step="0.1">
+    <span id="speedValue">1x</span>
+    <br><br>
+    <div id="currentPageLabel">Currently Reading Page: -</div>
+    <br>
     <div id="pdfContent"></div>
-
-    <!-- Link to the custom JavaScript script.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/2.1.1/tesseract.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
