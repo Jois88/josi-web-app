@@ -7,6 +7,9 @@ const playButton = document.getElementById('playButton');
 const pauseButton = document.getElementById('pauseButton');
 const stopButton = document.getElementById('stopButton');
 const pdfContent = document.getElementById('pdfContent');
+const speedControl = document.getElementById('speedControl');
+const speedValue = document.getElementById('speedValue');
+const currentPageLabel = document.getElementById('currentPageLabel');
 
 // UI Elements for better feedback
 const progressIndicator = document.createElement('div');
@@ -34,6 +37,7 @@ fileInput.addEventListener('change', function (event) {
                         return;
                     }
 
+                    currentPageLabel.innerText = `Currently Reading Page: ${pageNumber}`;
                     progressIndicator.innerText = `Processing page ${pageNumber} of ${pdf.numPages}...`;
 
                     pdf.getPage(pageNumber).then(function (page) {
@@ -53,7 +57,7 @@ fileInput.addEventListener('change', function (event) {
                         // Render the page
                         page.render(renderContext).promise.then(function () {
                             // Clear existing content and append new canvas
-                            pdfContent.innerHTML = ""; 
+                            pdfContent.innerHTML = "";
                             pdfContent.appendChild(canvas);
 
                             // Extract text content from the PDF page
@@ -145,7 +149,7 @@ playButton.addEventListener('click', function () {
             if (!utterance || synth.paused === false) {
                 utterance = new SpeechSynthesisUtterance(window.extractedText);
                 setVoice(); // Set the voice before speaking
-                utterance.rate = 1; // Set rate of speech
+                utterance.rate = parseFloat(speedControl.value); // Set rate of speech from speed control
                 utterance.pitch = 1; // Set pitch of speech
 
                 utterance.onstart = function () {
@@ -188,6 +192,14 @@ stopButton.addEventListener('click', function () {
         utterance = null; // Reset the utterance to enable fresh playback
         isPaused = false;
         console.log('Speech stopped.');
+    }
+});
+
+// Update speed value when the speed control slider changes
+speedControl.addEventListener('input', function () {
+    speedValue.innerText = `${speedControl.value}x`;
+    if (utterance) {
+        utterance.rate = parseFloat(speedControl.value);
     }
 });
 
