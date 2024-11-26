@@ -8,8 +8,7 @@ const pauseButton = document.getElementById('pauseButton');
 const stopButton = document.getElementById('stopButton');
 const pdfContent = document.getElementById('pdfContent');
 const speedControl = document.getElementById('speedControl');
-const speedValue = document.getElementById('speedValue');
-const currentPageLabel = document.getElementById('currentPageLabel');
+const pageIndicator = document.getElementById('pageIndicator');
 
 // UI Elements for better feedback
 const progressIndicator = document.createElement('div');
@@ -37,8 +36,8 @@ fileInput.addEventListener('change', function (event) {
                         return;
                     }
 
-                    currentPageLabel.innerText = `Currently Reading Page: ${pageNumber}`;
                     progressIndicator.innerText = `Processing page ${pageNumber} of ${pdf.numPages}...`;
+                    pageIndicator.innerText = `Currently Reading Page: ${pageNumber}`;
 
                     pdf.getPage(pageNumber).then(function (page) {
                         const scale = 1.5;
@@ -57,7 +56,7 @@ fileInput.addEventListener('change', function (event) {
                         // Render the page
                         page.render(renderContext).promise.then(function () {
                             // Clear existing content and append new canvas
-                            pdfContent.innerHTML = "";
+                            pdfContent.innerHTML = ""; 
                             pdfContent.appendChild(canvas);
 
                             // Extract text content from the PDF page
@@ -145,39 +144,29 @@ function setVoice() {
 
 playButton.addEventListener('click', function () {
     if (window.extractedText) {
-        if (!utterance) {
-            // If no utterance, create a new one
+        if (!utterance || isPaused) {
             utterance = new SpeechSynthesisUtterance(window.extractedText);
-            setVoice();
-            utterance.rate = parseFloat(speedControl.value);
-            utterance.pitch = 1;
+            setVoice(); // Set the voice before speaking
+            utterance.rate = speedControl.value; // Set rate of speech
+            utterance.pitch = 1; // Set pitch of speech
 
             utterance.onstart = function () {
                 console.log('Speech has started.');
-                playButton.disabled = true;
-                pauseButton.disabled = false;
-                stopButton.disabled = false;
             };
 
             utterance.onend = function () {
                 console.log('Speech has ended.');
-                resetButtons();
             };
 
             utterance.onerror = function (event) {
                 console.error('Speech synthesis error:', event.error);
                 progressIndicator.innerText = `An error occurred during playback: ${event.error}`;
-                resetButtons();
             };
 
             synth.speak(utterance);
-        } else if (synth.paused) {
-            // If paused, resume
-            synth.resume();
             isPaused = false;
-            playButton.disabled = true;
-            pauseButton.disabled = false;
-            stopButton.disabled = false;
+        } else {
+            synth.resume();
         }
     } else {
         progressIndicator.innerText = 'Please wait for the PDF text extraction to complete.';
@@ -189,38 +178,24 @@ pauseButton.addEventListener('click', function () {
         synth.pause();
         isPaused = true;
         console.log('Speech paused.');
-        playButton.disabled = false;
-        pauseButton.disabled = true;
-        stopButton.disabled = false;
-        progressIndicator.innerText = 'Playback paused.';
     }
 });
 
 stopButton.addEventListener('click', function () {
-    if (synth.speaking || isPaused) {
+    if (synth.speaking) {
         synth.cancel();
-        utterance = null; // Reset the utterance to enable fresh playback
         isPaused = false;
         console.log('Speech stopped.');
-        resetButtons();
-        progressIndicator.innerText = 'Playback stopped.';
     }
 });
 
-// Update speed value when the speed control slider changes
+// Speed Control Handler
 speedControl.addEventListener('input', function () {
-    speedValue.innerText = `${speedControl.value}x`;
     if (utterance) {
-        utterance.rate = parseFloat(speedControl.value);
+        utterance.rate = speedControl.value;
     }
+    console.log(`Speech rate set to: ${speedControl.value}x`);
 });
-
-// Function to reset button states after playback stops or errors occur
-function resetButtons() {
-    playButton.disabled = false;
-    pauseButton.disabled = true;
-    stopButton.disabled = true;
-}
 
 // Trigger setVoice() when voices are loaded
 if (synth.onvoiceschanged !== undefined) {
