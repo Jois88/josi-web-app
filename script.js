@@ -153,10 +153,12 @@ playButton.addEventListener('click', function () {
 
             utterance.onstart = function () {
                 console.log('Speech has started.');
+                progressIndicator.innerText = 'Playback in progress...';
             };
 
             utterance.onend = function () {
                 console.log('Speech has ended.');
+                progressIndicator.innerText = 'Playback finished.';
             };
 
             utterance.onerror = function (event) {
@@ -179,6 +181,7 @@ pauseButton.addEventListener('click', function () {
         synth.pause();
         isPaused = true;
         console.log('Speech paused.');
+        progressIndicator.innerText = 'Playback paused.';
     }
 });
 
@@ -188,6 +191,7 @@ stopButton.addEventListener('click', function () {
         utterance = null; // Reset the utterance to enable fresh playback
         isPaused = false;
         console.log('Speech stopped.');
+        progressIndicator.innerText = 'Playback stopped.';
     }
 });
 
