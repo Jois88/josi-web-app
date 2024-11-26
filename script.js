@@ -183,7 +183,7 @@ pauseButton.addEventListener('click', function () {
 });
 
 stopButton.addEventListener('click', function () {
-    if (synth.speaking) {
+    if (synth.speaking || isPaused) {
         synth.cancel();
         utterance = null; // Reset the utterance to enable fresh playback
         isPaused = false;
@@ -195,4 +195,3 @@ stopButton.addEventListener('click', function () {
 if (synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = setVoice;
 }
-
