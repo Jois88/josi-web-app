@@ -145,32 +145,40 @@ function setVoice() {
 
 playButton.addEventListener('click', function () {
     if (window.extractedText) {
-        if (!utterance || !synth.speaking || isPaused) {
+        if (!utterance) {
+            // If no utterance, create a new one
             utterance = new SpeechSynthesisUtterance(window.extractedText);
-            setVoice(); // Set the voice before speaking
-            utterance.rate = parseFloat(speedControl.value); // Set rate of speech from speed control
-            utterance.pitch = 1; // Set pitch of speech
+            setVoice();
+            utterance.rate = parseFloat(speedControl.value);
+            utterance.pitch = 1;
 
             utterance.onstart = function () {
                 console.log('Speech has started.');
-                progressIndicator.innerText = 'Playback in progress...';
+                playButton.disabled = true;
+                pauseButton.disabled = false;
+                stopButton.disabled = false;
             };
 
             utterance.onend = function () {
                 console.log('Speech has ended.');
-                progressIndicator.innerText = 'Playback finished.';
+                resetButtons();
             };
 
             utterance.onerror = function (event) {
                 console.error('Speech synthesis error:', event.error);
                 progressIndicator.innerText = `An error occurred during playback: ${event.error}`;
+                resetButtons();
             };
 
             synth.speak(utterance);
         } else if (synth.paused) {
+            // If paused, resume
             synth.resume();
+            isPaused = false;
+            playButton.disabled = true;
+            pauseButton.disabled = false;
+            stopButton.disabled = false;
         }
-        isPaused = false;
     } else {
         progressIndicator.innerText = 'Please wait for the PDF text extraction to complete.';
     }
@@ -181,6 +189,9 @@ pauseButton.addEventListener('click', function () {
         synth.pause();
         isPaused = true;
         console.log('Speech paused.');
+        playButton.disabled = false;
+        pauseButton.disabled = true;
+        stopButton.disabled = false;
         progressIndicator.innerText = 'Playback paused.';
     }
 });
@@ -191,6 +202,7 @@ stopButton.addEventListener('click', function () {
         utterance = null; // Reset the utterance to enable fresh playback
         isPaused = false;
         console.log('Speech stopped.');
+        resetButtons();
         progressIndicator.innerText = 'Playback stopped.';
     }
 });
@@ -202,6 +214,13 @@ speedControl.addEventListener('input', function () {
         utterance.rate = parseFloat(speedControl.value);
     }
 });
+
+// Function to reset button states after playback stops or errors occur
+function resetButtons() {
+    playButton.disabled = false;
+    pauseButton.disabled = true;
+    stopButton.disabled = true;
+}
 
 // Trigger setVoice() when voices are loaded
 if (synth.onvoiceschanged !== undefined) {
