@@ -145,31 +145,27 @@ function setVoice() {
 
 playButton.addEventListener('click', function () {
     if (window.extractedText) {
-        if (!utterance || synth.paused) {
-            if (!utterance || synth.paused === false) {
-                utterance = new SpeechSynthesisUtterance(window.extractedText);
-                setVoice(); // Set the voice before speaking
-                utterance.rate = parseFloat(speedControl.value); // Set rate of speech from speed control
-                utterance.pitch = 1; // Set pitch of speech
+        if (!utterance || !synth.speaking || isPaused) {
+            utterance = new SpeechSynthesisUtterance(window.extractedText);
+            setVoice(); // Set the voice before speaking
+            utterance.rate = parseFloat(speedControl.value); // Set rate of speech from speed control
+            utterance.pitch = 1; // Set pitch of speech
 
-                utterance.onstart = function () {
-                    console.log('Speech has started.');
-                };
+            utterance.onstart = function () {
+                console.log('Speech has started.');
+            };
 
-                utterance.onend = function () {
-                    console.log('Speech has ended.');
-                };
+            utterance.onend = function () {
+                console.log('Speech has ended.');
+            };
 
-                utterance.onerror = function (event) {
-                    console.error('Speech synthesis error:', event.error);
-                    progressIndicator.innerText = `An error occurred during playback: ${event.error}`;
-                };
+            utterance.onerror = function (event) {
+                console.error('Speech synthesis error:', event.error);
+                progressIndicator.innerText = `An error occurred during playback: ${event.error}`;
+            };
 
-                synth.speak(utterance);
-            } else {
-                synth.resume();
-            }
-        } else {
+            synth.speak(utterance);
+        } else if (synth.paused) {
             synth.resume();
         }
         isPaused = false;
