@@ -58,7 +58,7 @@ fileInput.addEventListener('change', function (event) {
                         // Render the page
                         page.render(renderContext).promise.then(function () {
                             // Clear existing content and append new canvas
-                            pdfContent.innerHTML = ""; 
+                            pdfContent.innerHTML = "";
                             pdfContent.appendChild(canvas);
 
                             // Extract text content from the PDF page
@@ -70,7 +70,7 @@ fileInput.addEventListener('change', function (event) {
 
                                 if (text.trim().length > 0) {
                                     // Text found, add to extractedText
-                                    window.extractedText += text + "\n";
+                                    window.extractedText += `\n[Page ${pageNumber}]\n` + text;
                                     processPage(pageNumber + 1);
                                 } else {
                                     // No text found, initiate OCR
@@ -84,7 +84,7 @@ fileInput.addEventListener('change', function (event) {
                                         }
                                     ).then(({ data: { text } }) => {
                                         if (text.trim().length > 0) {
-                                            window.extractedText += text + "\n";
+                                            window.extractedText += `\n[Page ${pageNumber}]\n` + text;
                                             progressIndicator.innerText = `OCR completed for page ${pageNumber}. Moving to the next page...`;
                                         } else {
                                             progressIndicator.innerText = `OCR could not extract any text on page ${pageNumber}. Skipping...`;
@@ -154,6 +154,7 @@ playButton.addEventListener('click', function () {
 
             utterance.onstart = function () {
                 console.log('Speech has started.');
+                updatePageIndicatorDuringPlayback();
             };
 
             utterance.onend = function () {
@@ -194,4 +195,25 @@ stopButton.addEventListener('click', function () {
 // Trigger setVoice() when voices are loaded
 if (synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = setVoice;
+}
+
+// Function to update the page indicator during playback
+function updatePageIndicatorDuringPlayback() {
+    let pageMatches = window.extractedText.match(/\[Page (\d+)\]/g);
+    if (pageMatches) {
+        let currentPageIndex = 0;
+
+        utterance.onboundary = function (event) {
+            if (event.name === 'word') {
+                const boundaryTime = event.elapsedTime;
+                if (currentPageIndex < pageMatches.length - 1) {
+                    // Check if it's time to move to the next page indicator
+                    const nextPageMatch = pageMatches[currentPageIndex + 1];
+                    const pageNumber = nextPageMatch.match(/\d+/)[0];
+                    pageIndicator.innerText = `Currently Reading Page: ${pageNumber}`;
+                    currentPageIndex++;
+                }
+            }
+        };
+    }
 }
