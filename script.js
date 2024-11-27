@@ -1,4 +1,3 @@
-// Include Tesseract.js to handle OCR for image-based PDFs
 const Tesseract = window.Tesseract;
 
 // HTML Elements
@@ -6,16 +5,11 @@ const fileInput = document.getElementById('fileInput');
 const playButton = document.getElementById('playButton');
 const pauseButton = document.getElementById('pauseButton');
 const stopButton = document.getElementById('stopButton');
+const speedControl = document.getElementById('speedControl');
+const speedValue = document.getElementById('speedValue');
 const pdfContent = document.getElementById('pdfContent');
 const pageIndicator = document.getElementById('pageIndicator');
 const progressIndicator = document.getElementById('progressIndicator');
-const speedControl = document.getElementById('speedControl');
-const speedValue = document.getElementById('speedValue');
-
-// UI Elements for better feedback
-speedControl.addEventListener('input', () => {
-    speedValue.textContent = `${speedControl.value}x`;
-});
 
 // PDF.js & File Load Handler
 fileInput.addEventListener('change', function (event) {
@@ -29,17 +23,18 @@ fileInput.addEventListener('change', function (event) {
             // Load the PDF using pdf.js
             pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
                 let currentPage = 1;
-                window.extractedText = ""; // Reset extracted text
-
+                window.currentUtterance = null;
+                window.isPaused = false;
+                playButton.disabled = true;
+                
                 function processPage(pageNumber) {
                     if (pageNumber > pdf.numPages) {
-                        progressIndicator.innerText = 'All pages processed successfully. Starting playback...';
-                        playButton.disabled = false;
+                        progressIndicator.innerText = 'All pages processed successfully.';
                         return;
                     }
 
-                    pageIndicator.innerText = `Currently Reading Page: ${pageNumber}`;
                     progressIndicator.innerText = `Processing page ${pageNumber} of ${pdf.numPages}...`;
+                    pageIndicator.innerText = `Currently Reading Page: ${pageNumber}`;
 
                     pdf.getPage(pageNumber).then(function (page) {
                         const scale = 1.5;
@@ -57,7 +52,6 @@ fileInput.addEventListener('change', function (event) {
 
                         // Render the page
                         page.render(renderContext).promise.then(function () {
-                            // Clear existing content and append new canvas
                             pdfContent.innerHTML = "";
                             pdfContent.appendChild(canvas);
 
@@ -69,9 +63,8 @@ fileInput.addEventListener('change', function (event) {
                                 }
 
                                 if (text.trim().length > 0) {
-                                    // Text found, add to extractedText
-                                    window.extractedText += `\n[Page ${pageNumber}]\n` + text;
-                                    processPage(pageNumber + 1);
+                                    // Text found, start reading
+                                    readPageText(text, pageNumber + 1);
                                 } else {
                                     // No text found, initiate OCR
                                     progressIndicator.innerText = `No text found on page ${pageNumber}. Performing OCR...`;
@@ -84,12 +77,12 @@ fileInput.addEventListener('change', function (event) {
                                         }
                                     ).then(({ data: { text } }) => {
                                         if (text.trim().length > 0) {
-                                            window.extractedText += `\n[Page ${pageNumber}]\n` + text;
-                                            progressIndicator.innerText = `OCR completed for page ${pageNumber}. Moving to the next page...`;
+                                            readPageText(text, pageNumber + 1);
+                                            progressIndicator.innerText = `OCR completed for page ${pageNumber}.`;
                                         } else {
                                             progressIndicator.innerText = `OCR could not extract any text on page ${pageNumber}. Skipping...`;
+                                            processPage(pageNumber + 1);
                                         }
-                                        processPage(pageNumber + 1);
                                     }).catch(function (error) {
                                         console.error('Error during OCR:', error);
                                         progressIndicator.innerText = `OCR failed on page ${pageNumber}. Skipping...`;
@@ -113,7 +106,28 @@ fileInput.addEventListener('change', function (event) {
                     });
                 }
 
-                // Start processing the first page
+                function readPageText(text, nextPage) {
+                    if (window.isPaused) {
+                        return;
+                    }
+                    
+                    window.currentUtterance = new SpeechSynthesisUtterance(text);
+                    setVoice(window.currentUtterance);
+                    window.currentUtterance.rate = parseFloat(speedControl.value);
+
+                    window.currentUtterance.onend = function () {
+                        processPage(nextPage);
+                    };
+
+                    window.currentUtterance.onerror = function (event) {
+                        console.error('Speech synthesis error:', event.error);
+                        progressIndicator.innerText = `An error occurred during playback: ${event.error}`;
+                        processPage(nextPage);
+                    };
+
+                    synth.speak(window.currentUtterance);
+                }
+
                 processPage(currentPage);
             }).catch(function (error) {
                 console.error('Error loading PDF:', error);
@@ -130,13 +144,10 @@ fileInput.addEventListener('change', function (event) {
 
 // SpeechSynthesis Functionality
 let synth = window.speechSynthesis;
-let utterance;
-let isPaused = false;
-let availableVoices = [];
 
 // Load voices and ensure a voice is selected
-function setVoice() {
-    availableVoices = synth.getVoices();
+function setVoice(utterance) {
+    const availableVoices = synth.getVoices();
     if (availableVoices.length > 0) {
         utterance.voice = availableVoices.find(voice => voice.lang === 'en-US') || availableVoices[0];
     } else {
@@ -145,75 +156,37 @@ function setVoice() {
 }
 
 playButton.addEventListener('click', function () {
-    if (window.extractedText) {
-        if (!utterance || isPaused) {
-            utterance = new SpeechSynthesisUtterance(window.extractedText);
-            setVoice(); // Set the voice before speaking
-            utterance.rate = parseFloat(speedControl.value); // Set rate of speech
-            utterance.pitch = 1; // Set pitch of speech
-
-            utterance.onstart = function () {
-                console.log('Speech has started.');
-                updatePageIndicatorDuringPlayback();
-            };
-
-            utterance.onend = function () {
-                console.log('Speech has ended.');
-            };
-
-            utterance.onerror = function (event) {
-                console.error('Speech synthesis error:', event.error);
-                progressIndicator.innerText = `An error occurred during playback: ${event.error}`;
-            };
-
-            synth.speak(utterance);
-            isPaused = false;
-        } else {
-            synth.resume();
-        }
-    } else {
-        progressIndicator.innerText = 'Please wait for the PDF text extraction to complete.';
+    if (window.currentUtterance && synth.paused) {
+        synth.resume();
+        window.isPaused = false;
     }
 });
 
 pauseButton.addEventListener('click', function () {
     if (synth.speaking) {
         synth.pause();
-        isPaused = true;
-        console.log('Speech paused.');
+        window.isPaused = true;
     }
 });
 
 stopButton.addEventListener('click', function () {
     if (synth.speaking) {
         synth.cancel();
-        isPaused = false;
-        console.log('Speech stopped.');
+        window.isPaused = true;
+        progressIndicator.innerText = 'Speech stopped.';
+    }
+});
+
+// Speed Control
+speedControl.addEventListener('input', function () {
+    speedValue.innerText = `${speedControl.value}x`;
+    if (window.currentUtterance) {
+        window.currentUtterance.rate = parseFloat(speedControl.value);
     }
 });
 
 // Trigger setVoice() when voices are loaded
 if (synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = setVoice;
+    synth.onvoiceschanged = () => setVoice(window.currentUtterance);
 }
 
-// Function to update the page indicator during playback
-function updatePageIndicatorDuringPlayback() {
-    let pageMatches = window.extractedText.match(/\[Page (\d+)\]/g);
-    if (pageMatches) {
-        let currentPageIndex = 0;
-
-        utterance.onboundary = function (event) {
-            if (event.name === 'word') {
-                const boundaryTime = event.elapsedTime;
-                if (currentPageIndex < pageMatches.length - 1) {
-                    // Check if it's time to move to the next page indicator
-                    const nextPageMatch = pageMatches[currentPageIndex + 1];
-                    const pageNumber = nextPageMatch.match(/\d+/)[0];
-                    pageIndicator.innerText = `Currently Reading Page: ${pageNumber}`;
-                    currentPageIndex++;
-                }
-            }
-        };
-    }
-}
