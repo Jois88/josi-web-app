@@ -17,7 +17,7 @@ let currentPage = 1;
 let isPaused = false;
 let synth = window.speechSynthesis;
 let utterance;
-let extractedText = ""; // Text for playback
+let stopRequested = false;
 
 // Event Listeners
 speedControl.addEventListener('input', function () {
@@ -35,9 +35,9 @@ fileInput.addEventListener('change', function (event) {
             const typedArray = new Uint8Array(this.result);
             pdfjsLib.getDocument(typedArray).promise.then(function (pdf) {
                 pdfDocument = pdf;
-                extractedText = ""; // Reset extracted text
                 currentPage = 1; // Start from the first page
-                processPage(currentPage);
+                progressIndicator.innerText = "PDF loaded. Ready to start.";
+                playButton.disabled = false;
             }).catch(function (error) {
                 console.error("Error loading PDF:", error);
                 progressIndicator.innerText = "Failed to load the PDF. Please try again.";
@@ -49,15 +49,45 @@ fileInput.addEventListener('change', function (event) {
     }
 });
 
-function processPage(pageNumber) {
+playButton.addEventListener('click', function () {
+    stopRequested = false;
+    if (!pdfDocument) {
+        progressIndicator.innerText = "Please load a PDF before starting playback.";
+        return;
+    }
+    isPaused = false;
+    processAndReadPage(currentPage);
+});
+
+pauseButton.addEventListener('click', function () {
+    if (synth.speaking) {
+        synth.pause();
+        isPaused = true;
+        progressIndicator.innerText = "Playback paused.";
+    }
+});
+
+stopButton.addEventListener('click', function () {
+    if (synth.speaking) {
+        synth.cancel();
+        stopRequested = true;
+        isPaused = false;
+        progressIndicator.innerText = "Playback stopped.";
+    }
+});
+
+function processAndReadPage(pageNumber) {
     if (pageNumber > pdfDocument.numPages) {
-        progressIndicator.innerText = "All pages processed successfully. Starting playback...";
-        playAudio();
+        progressIndicator.innerText = "All pages read successfully.";
+        return;
+    }
+
+    if (stopRequested) {
         return;
     }
 
     pageIndicator.innerText = `Currently Reading Page: ${pageNumber}`;
-    progressIndicator.innerText = `Processing page ${pageNumber} of ${pdfDocument.numPages}...`;
+    progressIndicator.innerText = `Processing page ${pageNumber}...`;
 
     pdfDocument.getPage(pageNumber).then(function (page) {
         const scale = 1.5;
@@ -73,8 +103,12 @@ function processPage(pageNumber) {
             viewport: viewport,
         };
 
+        // Render the page to the canvas
         page.render(renderContext).promise.then(function () {
-            // Extract text from the page
+            pdfContent.innerHTML = ""; // Clear previous page
+            pdfContent.appendChild(canvas);
+
+            // Extract text content
             page.getTextContent().then(function (textContent) {
                 let text = "";
                 textContent.items.forEach(item => {
@@ -82,22 +116,21 @@ function processPage(pageNumber) {
                 });
 
                 if (text.trim()) {
-                    extractedText += text + "\n";
-                    processPage(pageNumber + 1);
+                    readTextAloud(text, pageNumber);
                 } else {
-                    // Perform OCR if no text found
+                    // If no text is found, perform OCR
                     performOCR(canvas, pageNumber);
                 }
             }).catch(function (error) {
                 console.error("Error extracting text:", error);
                 progressIndicator.innerText = `Failed to extract text from page ${pageNumber}. Skipping...`;
-                processPage(pageNumber + 1);
+                processAndReadPage(pageNumber + 1); // Skip to next page
             });
         });
     }).catch(function (error) {
         console.error("Error rendering page:", error);
         progressIndicator.innerText = `Failed to render page ${pageNumber}. Skipping...`;
-        processPage(pageNumber + 1);
+        processAndReadPage(pageNumber + 1); // Skip to next page
     });
 }
 
@@ -108,40 +141,35 @@ function performOCR(canvas, pageNumber) {
         logger: (m) => console.log(m),
     }).then(({ data: { text } }) => {
         if (text.trim()) {
-            extractedText += text + "\n";
-            progressIndicator.innerText = `OCR completed for page ${pageNumber}.`;
+            readTextAloud(text, pageNumber);
         } else {
-            progressIndicator.innerText = `OCR found no text on page ${pageNumber}.`;
+            progressIndicator.innerText = `No text found on page ${pageNumber}. Skipping...`;
+            processAndReadPage(pageNumber + 1); // Skip to next page
         }
-        processPage(pageNumber + 1);
     }).catch(function (error) {
         console.error("Error during OCR:", error);
         progressIndicator.innerText = `OCR failed on page ${pageNumber}. Skipping...`;
-        processPage(pageNumber + 1);
+        processAndReadPage(pageNumber + 1); // Skip to next page
     });
 }
 
-function playAudio() {
-    if (!extractedText.trim()) {
-        progressIndicator.innerText = "No text to read. Please upload a valid PDF.";
+function readTextAloud(text, pageNumber) {
+    if (stopRequested) {
         return;
     }
 
-    if (isPaused && utterance) {
-        synth.resume();
-        isPaused = false;
-        return;
-    }
-
-    utterance = new SpeechSynthesisUtterance(extractedText);
+    utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = parseFloat(speedControl.value);
 
     utterance.onstart = function () {
-        progressIndicator.innerText = "Reading started.";
+        progressIndicator.innerText = `Reading page ${pageNumber}...`;
     };
 
     utterance.onend = function () {
-        progressIndicator.innerText = "Reading finished.";
+        if (!isPaused && !stopRequested) {
+            currentPage++;
+            processAndReadPage(currentPage);
+        }
     };
 
     utterance.onerror = function (event) {
@@ -151,21 +179,3 @@ function playAudio() {
 
     synth.speak(utterance);
 }
-
-playButton.addEventListener('click', playAudio);
-
-pauseButton.addEventListener('click', function () {
-    if (synth.speaking && !synth.paused) {
-        synth.pause();
-        isPaused = true;
-        progressIndicator.innerText = "Reading paused.";
-    }
-});
-
-stopButton.addEventListener('click', function () {
-    if (synth.speaking) {
-        synth.cancel();
-        isPaused = false;
-        progressIndicator.innerText = "Reading stopped.";
-    }
-});
