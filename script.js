@@ -35,7 +35,7 @@ fileInput.addEventListener('change', function (event) {
             const typedArray = new Uint8Array(this.result);
             pdfjsLib.getDocument(typedArray).promise.then(function (pdf) {
                 pdfDocument = pdf;
-                currentPage = 1; // Start from the first page
+                currentPage = 1; // Ensure starting from the first page
                 progressIndicator.innerText = "PDF loaded. Ready to start.";
                 playButton.disabled = false;
             }).catch(function (error) {
@@ -56,7 +56,11 @@ playButton.addEventListener('click', function () {
         return;
     }
     isPaused = false;
-    processAndReadPage(currentPage);
+    if (currentPage === 1) {
+        processAndReadPage(currentPage); // Explicitly start reading from page 1
+    } else {
+        processAndReadPage(currentPage); // Continue from the current page
+    }
 });
 
 pauseButton.addEventListener('click', function () {
