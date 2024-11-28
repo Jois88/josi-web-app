@@ -20,8 +20,13 @@
         <label for="speedControl">Speed:</label>
         <input type="range" id="speedControl" min="0.5" max="2" step="0.1" value="1">
         <span id="speedValue">1x</span>
+
+        <label for="voiceSelect">Choose Voice:</label>
+        <select id="voiceSelect"></select>
+
         <div id="pageIndicator">Currently Reading Page: -</div>
         <div id="progressIndicator"></div>
+        <div id="loading-spinner"></div>
         <div id="pdfContent"></div>
     </div>
     <script>
@@ -38,8 +43,32 @@
         const progressIndicator = document.getElementById('progressIndicator');
         const speedControl = document.getElementById('speedControl');
         const speedValue = document.getElementById('speedValue');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const spinner = document.getElementById('loading-spinner');
 
-        // UI Elements for better feedback
+        // SpeechSynthesis Setup
+        let synth = window.speechSynthesis;
+        let utterance;
+        let isPaused = false;
+        let availableVoices = [];
+
+        function setVoiceOptions() {
+            availableVoices = synth.getVoices();
+            voiceSelect.innerHTML = ""; // Clear any existing options
+            availableVoices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.text = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        // Load voice options when available
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = setVoiceOptions;
+        }
+
+        // Update speed display value
         speedControl.addEventListener('input', () => {
             speedValue.textContent = `${speedControl.value}x`;
         });
@@ -101,6 +130,7 @@
                                             processPage(pageNumber + 1);
                                         } else {
                                             // No text found, initiate OCR
+                                            spinner.style.display = 'block'; // Show spinner
                                             progressIndicator.innerText = `No text found on page ${pageNumber}. Performing OCR...`;
 
                                             Tesseract.recognize(
@@ -116,10 +146,12 @@
                                                 } else {
                                                     progressIndicator.innerText = `OCR could not extract any text on page ${pageNumber}. Skipping...`;
                                                 }
+                                                spinner.style.display = 'none'; // Hide spinner
                                                 processPage(pageNumber + 1);
                                             }).catch(function (error) {
                                                 console.error('Error during OCR:', error);
                                                 progressIndicator.innerText = `OCR failed on page ${pageNumber}. Skipping...`;
+                                                spinner.style.display = 'none'; // Hide spinner
                                                 processPage(pageNumber + 1);
                                             });
                                         }
@@ -155,48 +187,39 @@
             }
         });
 
-        // SpeechSynthesis Functionality
-        let synth = window.speechSynthesis;
-        let utterance;
-        let isPaused = false;
-        let availableVoices = [];
-
-        // Load voices and ensure a voice is selected
-        function setVoice() {
-            availableVoices = synth.getVoices();
-            if (availableVoices.length > 0) {
-                utterance.voice = availableVoices.find(voice => voice.lang === 'en-US') || availableVoices[0];
-            } else {
-                console.warn('No available voices found. Please ensure your browser supports SpeechSynthesis voices.');
-            }
+        // Function to split extracted text into chunks
+        function splitTextIntoChunks(text, chunkSize = 1000) {
+            return text.match(new RegExp(`.{1,${chunkSize}}(\\s|$)`, 'g')) || [];
         }
 
+        // SpeechSynthesis Play/Pause/Stop Functions
         playButton.addEventListener('click', function () {
             if (window.extractedText) {
-                if (!utterance || isPaused) {
-                    utterance = new SpeechSynthesisUtterance(window.extractedText);
-                    setVoice(); // Set the voice before speaking
-                    utterance.rate = parseFloat(speedControl.value); // Set rate of speech
-                    utterance.pitch = 1; // Set pitch of speech
+                const textChunks = splitTextIntoChunks(window.extractedText);
+                let chunkIndex = 0;
 
-                    utterance.onstart = function () {
-                        console.log('Speech has started.');
-                    };
+                function speakChunk() {
+                    if (chunkIndex < textChunks.length) {
+                        utterance = new SpeechSynthesisUtterance(textChunks[chunkIndex]);
+                        setVoiceOptions();
+                        utterance.voice = availableVoices[voiceSelect.value];
+                        utterance.rate = parseFloat(speedControl.value);
 
-                    utterance.onend = function () {
-                        console.log('Speech has ended.');
-                    };
+                        utterance.onend = function () {
+                            chunkIndex++;
+                            speakChunk(); // Move to the next chunk
+                        };
 
-                    utterance.onerror = function (event) {
-                        console.error('Speech synthesis error:', event.error);
-                        progressIndicator.innerText = `An error occurred during playback: ${event.error}`;
-                    };
-
-                    synth.speak(utterance);
-                    isPaused = false;
-                } else {
-                    synth.resume();
+                        synth.speak(utterance);
+                    }
                 }
+
+                if (isPaused) {
+                    synth.resume();
+                } else {
+                    speakChunk();
+                }
+                isPaused = false;
             } else {
                 progressIndicator.innerText = 'Please wait for the PDF text extraction to complete.';
             }
@@ -217,11 +240,6 @@
                 console.log('Speech stopped.');
             }
         });
-
-        // Trigger setVoice() when voices are loaded
-        if (synth.onvoiceschanged !== undefined) {
-            synth.onvoiceschanged = setVoice;
-        }
     </script>
 </body>
 </html>
