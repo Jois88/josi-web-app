@@ -5,11 +5,18 @@ const fileInput = document.getElementById('fileInput');
 const playButton = document.getElementById('playButton');
 const pauseButton = document.getElementById('pauseButton');
 const stopButton = document.getElementById('stopButton');
+const nextPageButton = document.createElement('button');
 const speedControl = document.getElementById('speedControl');
 const speedValue = document.getElementById('speedValue');
 const pageIndicator = document.getElementById('pageIndicator');
 const progressIndicator = document.getElementById('progressIndicator');
 const pdfContent = document.getElementById('pdfContent');
+
+// Add Next Page button
+nextPageButton.textContent = "Next Page";
+nextPageButton.id = "nextPageButton";
+nextPageButton.style.display = "none"; // Hide initially
+document.querySelector('.controls').appendChild(nextPageButton);
 
 // Variables for PDF and Speech
 let pdfDocument = null;
@@ -56,11 +63,7 @@ playButton.addEventListener('click', function () {
         return;
     }
     isPaused = false;
-    if (currentPage === 1) {
-        processAndReadPage(currentPage); // Explicitly start reading from page 1
-    } else {
-        processAndReadPage(currentPage); // Continue from the current page
-    }
+    processAndReadPage(currentPage);
 });
 
 pauseButton.addEventListener('click', function () {
@@ -80,9 +83,18 @@ stopButton.addEventListener('click', function () {
     }
 });
 
+nextPageButton.addEventListener('click', function () {
+    if (currentPage <= pdfDocument.numPages) {
+        processAndReadPage(currentPage);
+    } else {
+        progressIndicator.innerText = "No more pages to process.";
+    }
+});
+
 function processAndReadPage(pageNumber) {
     if (pageNumber > pdfDocument.numPages) {
         progressIndicator.innerText = "All pages read successfully.";
+        nextPageButton.style.display = "none"; // Hide Next Page button
         return;
     }
 
@@ -127,14 +139,14 @@ function processAndReadPage(pageNumber) {
                 }
             }).catch(function (error) {
                 console.error("Error extracting text:", error);
-                progressIndicator.innerText = `Failed to extract text from page ${pageNumber}. Skipping...`;
-                processAndReadPage(pageNumber + 1); // Skip to next page
+                progressIndicator.innerText = `Failed to extract text from page ${pageNumber}. Would you like to skip this page?`;
+                nextPageButton.style.display = "inline"; // Show Next Page button
             });
         });
     }).catch(function (error) {
         console.error("Error rendering page:", error);
-        progressIndicator.innerText = `Failed to render page ${pageNumber}. Skipping...`;
-        processAndReadPage(pageNumber + 1); // Skip to next page
+        progressIndicator.innerText = `Failed to render page ${pageNumber}. Would you like to skip this page?`;
+        nextPageButton.style.display = "inline"; // Show Next Page button
     });
 }
 
@@ -147,13 +159,13 @@ function performOCR(canvas, pageNumber) {
         if (text.trim()) {
             readTextAloud(text, pageNumber);
         } else {
-            progressIndicator.innerText = `No text found on page ${pageNumber}. Skipping...`;
-            processAndReadPage(pageNumber + 1); // Skip to next page
+            progressIndicator.innerText = `No text found on page ${pageNumber}. Would you like to skip this page?`;
+            nextPageButton.style.display = "inline"; // Show Next Page button
         }
     }).catch(function (error) {
         console.error("Error during OCR:", error);
-        progressIndicator.innerText = `OCR failed on page ${pageNumber}. Skipping...`;
-        processAndReadPage(pageNumber + 1); // Skip to next page
+        progressIndicator.innerText = `OCR failed on page ${pageNumber}. Would you like to skip this page?`;
+        nextPageButton.style.display = "inline"; // Show Next Page button
     });
 }
 
@@ -170,15 +182,15 @@ function readTextAloud(text, pageNumber) {
     };
 
     utterance.onend = function () {
-        if (!isPaused && !stopRequested) {
-            currentPage++;
-            processAndReadPage(currentPage);
-        }
+        nextPageButton.style.display = "inline"; // Show Next Page button after reading
+        progressIndicator.innerText = `Finished reading page ${pageNumber}. Click 'Next Page' to continue.`;
+        currentPage++; // Increment the page
     };
 
     utterance.onerror = function (event) {
         console.error("SpeechSynthesis error:", event);
         progressIndicator.innerText = "An error occurred during playback.";
+        nextPageButton.style.display = "inline"; // Show Next Page button
     };
 
     synth.speak(utterance);
