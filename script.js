@@ -12,24 +12,59 @@ document.querySelectorAll('nav ul li a').forEach(anchor => {
   });
 });
 
-// Toggle Light/Dark Mode (Optional Feature)
+// Scroll-to-Top Button
+const scrollToTopButton = document.createElement('button');
+scrollToTopButton.textContent = '↑ Top';
+scrollToTopButton.style.position = 'fixed';
+scrollToTopButton.style.bottom = '20px';
+scrollToTopButton.style.right = '20px';
+scrollToTopButton.style.padding = '10px 15px';
+scrollToTopButton.style.backgroundColor = '#1abc9c';
+scrollToTopButton.style.color = '#fff';
+scrollToTopButton.style.border = 'none';
+scrollToTopButton.style.borderRadius = '5px';
+scrollToTopButton.style.cursor = 'pointer';
+scrollToTopButton.style.display = 'none';
+scrollToTopButton.style.zIndex = '1000';
+
+document.body.appendChild(scrollToTopButton);
+
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 300) {
+    scrollToTopButton.style.display = 'block';
+  } else {
+    scrollToTopButton.style.display = 'none';
+  }
+});
+
+scrollToTopButton.addEventListener('click', () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+});
+
+// Toggle Dark/Light Mode
 const toggleModeButton = document.createElement('button');
 toggleModeButton.textContent = 'Toggle Dark Mode';
 toggleModeButton.style.position = 'fixed';
 toggleModeButton.style.bottom = '20px';
-toggleModeButton.style.right = '20px';
+toggleModeButton.style.right = '90px';
 toggleModeButton.style.padding = '10px 15px';
 toggleModeButton.style.backgroundColor = '#1abc9c';
 toggleModeButton.style.color = '#fff';
 toggleModeButton.style.border = 'none';
 toggleModeButton.style.borderRadius = '5px';
 toggleModeButton.style.cursor = 'pointer';
+toggleModeButton.style.zIndex = '1000';
 
 document.body.appendChild(toggleModeButton);
 
 toggleModeButton.addEventListener('click', () => {
   document.body.classList.toggle('dark-mode');
-  toggleModeButton.textContent = document.body.classList.contains('dark-mode') ? 'Toggle Light Mode' : 'Toggle Dark Mode';
+  toggleModeButton.textContent = document.body.classList.contains('dark-mode') 
+    ? 'Toggle Light Mode' 
+    : 'Toggle Dark Mode';
 });
 
 // Add Dark Mode Styles
@@ -46,36 +81,9 @@ darkModeStyles.textContent = `
   body.dark-mode nav ul li a {
     color: #1abc9c;
   }
+  body.dark-mode button {
+    background-color: #16a085;
+    color: #fff;
+  }
 `;
 document.head.appendChild(darkModeStyles);
-
-// Scroll to Top Button
-const scrollToTopButton = document.createElement('button');
-scrollToTopButton.textContent = '↑ Top';
-scrollToTopButton.style.position = 'fixed';
-scrollToTopButton.style.bottom = '20px';
-scrollToTopButton.style.right = '90px';
-scrollToTopButton.style.padding = '10px 15px';
-scrollToTopButton.style.backgroundColor = '#1abc9c';
-scrollToTopButton.style.color = '#fff';
-scrollToTopButton.style.border = 'none';
-scrollToTopButton.style.borderRadius = '5px';
-scrollToTopButton.style.cursor = 'pointer';
-scrollToTopButton.style.display = 'none';
-
-document.body.appendChild(scrollToTopButton);
-
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 200) {
-    scrollToTopButton.style.display = 'block';
-  } else {
-    scrollToTopButton.style.display = 'none';
-  }
-});
-
-scrollToTopButton.addEventListener('click', () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
-});
