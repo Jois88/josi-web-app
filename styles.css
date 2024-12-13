@@ -57,6 +57,61 @@ video {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Resume Download Section Styles */
+#resume-download {
+    text-align: center;
+    margin: 20px;
+}
+
+#resume-download button {
+    padding: 10px 20px;
+    background-color: #0073e6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+#resume-download button:hover {
+    background-color: #005bb5;
+}
+
+/* Email Form Styles */
+#email-form {
+    max-width: 600px;
+    margin: 20px auto;
+    text-align: left;
+}
+
+#email-form label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+}
+
+#email-form input, #email-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#email-form button {
+    padding: 10px 20px;
+    background-color: #0073e6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+#email-form button:hover {
+    background-color: #005bb5;
+}
+
 /* Contact Section */
 #contact {
     text-align: left;
@@ -84,7 +139,7 @@ footer {
     width: 100%;
 }
 
-/* Buttons */
+/* Buttons (General) */
 button {
     display: inline-block;
     padding: 10px 20px;
