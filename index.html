@@ -1,23 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yosef Kifle - Portfolio</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #ff9800;
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background-color: #333;
+            padding: 15px 0;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        nav a:hover {
+            background-color: #ff9800;
+        }
+
+        .hero {
+            background-image: url('your-hero-image.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 100px 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+        }
+
+        .hero button {
+            margin-top: 20px;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .hero button:hover {
+            background-color: #e68900;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        section {
+            margin-bottom: 40px;
+        }
+
+        section h2 {
+            border-left: 5px solid #ff9800;
+            padding-left: 10px;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input, textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button[type="submit"] {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #e68900;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+        }
+
+        footer a {
+            color: #ff9800;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
+
 <body>
-    <header>
+    <!-- Navigation Menu -->
+    <nav>
+        <a href="#contact">Contact</a>
+        <a href="#video-intro">Video</a>
+        <a href="#resume-download">Resume</a>
+        <a href="#profile">Profile</a>
+        <a href="#education">Education</a>
+        <a href="#experience">Experience</a>
+        <a href="#skills">Skills</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
         <h1>Yosef Kifle</h1>
-        <p>Welcome to my portfolio! I’m an E-commerce Specialist and IT enthusiast with a diverse professional background.</p>
+        <p>Welcome! I’m an E-commerce Specialist and IT enthusiast passionate about innovation and technology.</p>
+        <button onclick="document.querySelector('#contact').scrollIntoView({behavior: 'smooth'});">Contact Me</button>
     </header>
+
     <main>
+        <!-- Contact Section -->
         <section id="contact">
             <h2>Contact</h2>
-            <p>Phone: +48 451 594 663</p>
-            <p>Email: joisgett@gmail.com</p>
-            <p>Location: Warsaw, Poland</p>
+            <p><strong>Phone:</strong> <a href="tel:+48451594663">+48 451 594 663</a></p>
+            <p><strong>Email:</strong> <a href="mailto:joisgett@gmail.com">joisgett@gmail.com</a></p>
+            <p><strong>Location:</strong> Warsaw, Poland</p>
         </section>
+
+        <!-- Video Introduction Section -->
         <section id="video-intro">
             <h2>Video Introduction</h2>
             <p>Watch this short video to learn more about me and my career journey.</p>
@@ -26,6 +184,8 @@
                 Your browser does not support the video tag.
             </video>
         </section>
+
+        <!-- Resume Download Section -->
         <section id="resume-download">
             <h2>Download My Resume</h2>
             <p>Click the button below to download a PDF copy of my resume.</p>
@@ -33,6 +193,8 @@
                 <button>Download Resume</button>
             </a>
         </section>
+
+        <!-- Email Form Section -->
         <section id="email-form">
             <h2>Send Me an Email</h2>
             <form action="https://formspree.io/f/your-form-id" method="POST">
@@ -48,10 +210,14 @@
                 <button type="submit">Send Email</button>
             </form>
         </section>
+
+        <!-- Profile Section -->
         <section id="profile">
             <h2>Profile</h2>
             <p>With experience in digital marketing, customer service, and IT solutions, I am committed to blending technology and innovation in my career journey.</p>
         </section>
+
+        <!-- Education Section -->
         <section id="education">
             <h2>Education</h2>
             <ul>
@@ -60,6 +226,8 @@
                 <li><strong>High School Diploma</strong> - Nejashi Ethio-Turkish International School, Ethiopia</li>
             </ul>
         </section>
+
+        <!-- Work Experience Section -->
         <section id="experience">
             <h2>Work Experience</h2>
             <ul>
@@ -68,6 +236,8 @@
                 <li><strong>Assistant to Systems Analyst</strong> - Blue Nile Networking Solutions, Ethiopia</li>
             </ul>
         </section>
+
+        <!-- Skills Section -->
         <section id="skills">
             <h2>Skills</h2>
             <ul>
@@ -79,8 +249,10 @@
             </ul>
         </section>
     </main>
+
     <footer>
-        <p>&copy; 2024 Yosef Kifle</p>
+        <p>&copy; 2024 Yosef Kifle | <a href="https://linkedin.com/in/your-profile" target="_blank">LinkedIn</a> | <a href="https://github.com/your-profile" target="_blank">GitHub</a></p>
     </footer>
 </body>
+
 </html>
