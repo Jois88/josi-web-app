@@ -195,7 +195,12 @@
         </section>
 
         <!-- Other Sections -->
-        <!-- (Contact, Video, Resume, etc.) -->
+        <section id="contact">
+            <h2>Contact</h2>
+            <p><strong>Phone:</strong> <a href="tel:+48451594663">+48 451 594 663</a></p>
+            <p><strong>Email:</strong> <a href="mailto:joisgett@gmail.com">joisgett@gmail.com</a></p>
+            <p><strong>Location:</strong> Warsaw, Poland</p>
+        </section>
     </main>
 
     <footer>
@@ -207,16 +212,18 @@
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
 
-        chatForm.addEventListener('submit', (event) => {
+        chatForm.addEventListener('submit', handleSendMessage);
+
+        function handleSendMessage(event) {
             event.preventDefault();
             const userMessage = chatInput.value.trim();
 
             if (userMessage) {
                 addMessage(userMessage, 'user-message');
-                simulateBotReply(userMessage);
                 chatInput.value = '';
+                simulateBotReply(userMessage);
             }
-        });
+        }
 
         function addMessage(text, className) {
             const messageDiv = document.createElement('div');
