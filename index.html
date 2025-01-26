@@ -17,60 +17,36 @@
         header {
             background-color: #ff9800;
             color: white;
-            padding: 60px 20px;
+            padding: 40px;
             text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
         }
 
         nav {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             background-color: #333;
-            padding: 15px 0;
+            padding: 15px;
         }
 
         nav a {
             color: white;
             text-decoration: none;
-            padding: 10px 20px;
+            padding: 10px 15px;
             border-radius: 5px;
         }
 
         nav a:hover {
             background-color: #ff9800;
-        }
-
-        .hero {
-            background-image: url('your-hero-image.jpg');
-            background-size: cover;
-            background-position: center;
-            padding: 100px 20px;
-            text-align: center;
-            color: white;
-        }
-
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-
-        .hero p {
-            font-size: 1.5rem;
-        }
-
-        .hero button {
-            margin-top: 20px;
-            background-color: #ff9800;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .hero button:hover {
-            background-color: #e68900;
         }
 
         main {
@@ -82,75 +58,23 @@
         }
 
         section h2 {
+            font-size: 1.8rem;
             border-left: 5px solid #ff9800;
             padding-left: 10px;
-            font-size: 2rem;
             margin-bottom: 20px;
         }
 
-        #chat-interface {
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto 40px;
-        }
-
-        #messages {
-            height: 300px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            overflow-y: auto;
-            background: #f9f9f9;
-            margin-bottom: 20px;
-        }
-
-        .message {
-            margin-bottom: 10px;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-
-        .user-message {
-            background-color: #e1f5fe;
-            text-align: right;
-        }
-
-        .bot-message {
-            background-color: #e8eaf6;
-        }
-
-        #chat-form {
+        .profile, .work, .education, .certifications {
             display: flex;
+            flex-direction: column;
             gap: 10px;
-        }
-
-        #chat-input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        #chat-send {
-            background-color: #ff9800;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #chat-send:hover {
-            background-color: #e68900;
         }
 
         footer {
             text-align: center;
-            padding: 20px;
             background-color: #333;
             color: white;
+            padding: 20px;
         }
 
         footer a {
@@ -165,79 +89,79 @@
 </head>
 
 <body>
-    <!-- Navigation Menu -->
-    <nav>
-        <a href="#contact">Contact</a>
-        <a href="#video-intro">Video</a>
-        <a href="#resume-download">Resume</a>
-        <a href="#profile">Profile</a>
-        <a href="#education">Education</a>
-        <a href="#experience">Experience</a>
-        <a href="#skills">Skills</a>
-    </nav>
-
-    <!-- Hero Section -->
-    <header class="hero">
+    <header>
         <h1>Yosef Kifle</h1>
-        <p>Welcome! I’m an E-commerce Specialist and IT enthusiast passionate about innovation and technology.</p>
-        <button onclick="document.querySelector('#contact').scrollIntoView({behavior: 'smooth'});">Contact Me</button>
+        <p>E-commerce Specialist | IT Enthusiast</p>
     </header>
 
+    <nav>
+        <a href="#profile">Profile</a>
+        <a href="#work">Work Experience</a>
+        <a href="#education">Education</a>
+        <a href="#certifications">Certifications</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
     <main>
-        <!-- Chat Interface Section -->
-        <section id="chat-interface">
-            <h2>Chat Interface</h2>
-            <div id="messages"></div>
-            <form id="chat-form">
-                <input type="text" id="chat-input" placeholder="Type your message..." required>
-                <button type="submit" id="chat-send">Send</button>
-            </form>
+        <section id="profile">
+            <h2>Profile</h2>
+            <p>My journey weaves through the disciplined art of Wushu, heartfelt humanitarian efforts, the intellectual rigor of STEM competitions, and digital exploration with Google Digital Garage. Each experience has taught me lessons in optimism, collaboration, and creativity. I aim to blend technology, innovation, and compassion in my professional journey.</p>
         </section>
 
-        <!-- Other Sections -->
+        <section id="work">
+            <h2>Work Experience</h2>
+            <div class="work">
+                <div>
+                    <strong>E-commerce Specialist</strong> - Habesha Foods Mart (Ethiopia, Addis Ababa)
+                    <p>Played a pivotal role in enhancing the online shopping experience and driving digital sales growth through digital marketing, website management, and data analytics.</p>
+                </div>
+
+                <div>
+                    <strong>Assistant to a Systems Analyst</strong> - Blue Nile Networking Solutions (Ethiopia, Addis Ababa)
+                    <p>Enhanced IT and business collaboration, improving analytical prowess, communication skills, and technical knowledge while contributing to impactful IT solutions.</p>
+                </div>
+
+                <div>
+                    <strong>Taxi Driver</strong> - Evelstar (Poland)
+                    <p>Ensured passenger safety, punctuality, and comfort, earning trust and loyalty by providing exceptional customer service.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="education">
+            <h2>Education</h2>
+            <div class="education">
+                <div>
+                    <strong>Bachelor's Degree in Economics</strong> - Unity University (Ethiopia, Addis Ababa)
+                </div>
+                <div>
+                    <strong>Second Degree in Management</strong> - WSPA University (Poland, Lublin)</div>
+                <div>
+                    <strong>High School Diploma</strong> - Nejashi Ethio-Turkish International School (Ethiopia, Addis Ababa)</div>
+            </div>
+        </section>
+
+        <section id="certifications">
+            <h2>Certifications</h2>
+            <div class="certifications">
+                <p>Google Digital Garage Certification</p>
+                <p>Polish Driver's License</p>
+                <p>Wushu Martial Arts Certificate</p>
+                <p>STEM Competitions</p>
+            </div>
+        </section>
+
         <section id="contact">
             <h2>Contact</h2>
-            <p><strong>Phone:</strong> <a href="tel:+48451594663">+48 451 594 663</a></p>
+            <p><strong>Phone:</strong> <a href="tel:+48786445274">+48 786 445 274</a></p>
             <p><strong>Email:</strong> <a href="mailto:joisgett@gmail.com">joisgett@gmail.com</a></p>
-            <p><strong>Location:</strong> Warsaw, Poland</p>
+            <p><strong>Location:</strong> Lublin, Poland</p>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2024 Yosef Kifle | <a href="https://linkedin.com/in/your-profile" target="_blank">LinkedIn</a> | <a href="https://github.com/your-profile" target="_blank">GitHub</a></p>
+        <p>&copy; 2025 Yosef Kifle | <a href="https://linkedin.com/in/your-profile" target="_blank">LinkedIn</a> | <a href="https://github.com/your-profile" target="_blank">GitHub</a></p>
     </footer>
-
-    <script>
-        const messages = document.getElementById('messages');
-        const chatForm = document.getElementById('chat-form');
-        const chatInput = document.getElementById('chat-input');
-
-        chatForm.addEventListener('submit', handleSendMessage);
-
-        function handleSendMessage(event) {
-            event.preventDefault();
-            const userMessage = chatInput.value.trim();
-
-            if (userMessage) {
-                addMessage(userMessage, 'user-message');
-                chatInput.value = '';
-                simulateBotReply(userMessage);
-            }
-        }
-
-        function addMessage(text, className) {
-            const messageDiv = document.createElement('div');
-            messageDiv.textContent = text;
-            messageDiv.className = `message ${className}`;
-            messages.appendChild(messageDiv);
-            messages.scrollTop = messages.scrollHeight;
-        }
-
-        function simulateBotReply(userMessage) {
-            const botReply = `You said: "${userMessage}". How can I help you further?`;
-            setTimeout(() => addMessage(botReply, 'bot-message'), 1000);
-        }
-    </script>
 </body>
 
 </html>
