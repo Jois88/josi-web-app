@@ -75,20 +75,31 @@
             background-color: #333;
             color: white;
             padding: 20px;
+            position: relative;
         }
 
         footer a {
             color: #ff9800;
             text-decoration: none;
-            margin: 0 10px;
         }
 
         footer a:hover {
             text-decoration: underline;
         }
 
-        .footer-links {
-            margin-bottom: 10px;
+        .cta-button {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+
+        .cta-button:hover {
+            background-color: #e68900;
         }
     </style>
 </head>
@@ -165,14 +176,8 @@
     </main>
 
     <footer>
-        <div class="footer-links">
-            <a href="#profile">Profile</a>
-            <a href="#work">Work Experience</a>
-            <a href="#education">Education</a>
-            <a href="#certifications">Certifications</a>
-            <a href="#contact">Contact</a>
-        </div>
         <p>&copy; 2025 Yosef Kifle</p>
+        <button class="cta-button" onclick="window.location.href='mailto:joisgett@gmail.com'">Hire Me</button>
     </footer>
 </body>
 
